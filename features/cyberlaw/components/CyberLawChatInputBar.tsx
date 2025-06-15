@@ -144,6 +144,19 @@ export const CyberLawChatInputBar: React.FC<CyberLawChatInputBarProps> = ({
     textarea.style.height = `${Math.min(height, 80)}px`; // Max height of 80px for mobile
   };
 
+  // Enhanced button text and styling for loading state
+  const getButtonContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 border border-hacker-dark border-t-transparent rounded-full animate-spin"></div>
+          <span className="hidden sm:inline">PROCESSING</span>
+          <span className="sm:hidden">...</span>
+        </div>
+      );
+    }
+    return 'SEND';
+  };
 
   return (
     <div className="relative"> 
@@ -196,7 +209,7 @@ export const CyberLawChatInputBar: React.FC<CyberLawChatInputBarProps> = ({
             onInput={handleInput}
             placeholder={placeholderTextToShow}
             disabled={isLoading}
-            className="flex-grow p-1.5 sm:p-2 text-xs sm:text-sm bg-hacker-dark text-hacker-white placeholder-hacker-gray focus:outline-none font-roboto-mono resize-none overflow-y-auto scrollbar-thin scrollbar-thumb-hacker-gray scrollbar-track-hacker-border"
+            className="flex-grow p-1.5 sm:p-2 text-xs sm:text-sm bg-hacker-dark text-hacker-white placeholder-hacker-gray focus:outline-none focus:ring-1 focus:ring-hacker-accent focus:border-hacker-accent font-roboto-mono resize-none overflow-y-auto scrollbar-thin scrollbar-thumb-hacker-gray scrollbar-track-hacker-border transition-colors duration-200"
             rows={1} // Start with 1 row, JS will adjust
             onKeyDown={handleKeyDown}
             style={{ minHeight: '34px', maxHeight: '80px' }} // Max height for mobile
@@ -208,10 +221,14 @@ export const CyberLawChatInputBar: React.FC<CyberLawChatInputBarProps> = ({
           <button
             type="submit"
             disabled={isLoading || !inputText.trim()}
-            className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-hacker-green text-hacker-dark font-share-tech-mono rounded-r hover:bg-opacity-80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm self-stretch flex items-center" // Ensure button stretches vertically
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 font-share-tech-mono rounded-r transition-all duration-200 disabled:cursor-not-allowed text-xs sm:text-sm self-stretch flex items-center justify-center min-w-[60px] sm:min-w-[80px] ${
+              isLoading 
+                ? 'bg-hacker-gray text-hacker-dark opacity-75' 
+                : 'bg-hacker-green text-hacker-dark hover:bg-opacity-80 disabled:opacity-50'
+            }`}
             aria-label="Send legal query"
           >
-            SEND
+            {getButtonContent()}
           </button>
         </div>
       </form>
