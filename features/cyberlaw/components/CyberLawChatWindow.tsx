@@ -6,7 +6,7 @@ import { LoadingSpinner } from '../../../components/LoadingSpinner';
 
 interface CyberLawChatWindowProps {
   messages: Message[];
-  onSendMessage: (text: string, file?: File) => void;
+  onSendMessage: (text: string) => void;
   isBotLoading: boolean;
   botName: string;
   botTypingMessage: string;
@@ -36,12 +36,6 @@ const EmptyState: React.FC<{ jurisdictionName: string; botName: string }> = ({ j
     <p className="text-sm sm:text-base text-hacker-gray mb-4 max-w-md">
       I'm here to assist you with cyber law queries for <span className="text-hacker-green font-semibold">{jurisdictionName}</span>.
     </p>
-    <div className="flex items-center gap-2 text-xs text-hacker-gray mb-4">
-      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" clipRule="evenodd" />
-      </svg>
-      <span>Upload screenshots, documents, or code files for analysis</span>
-    </div>
     <p className="text-xs text-hacker-gray mt-4 opacity-75">
       Start typing your question below to begin our conversation.
     </p>
