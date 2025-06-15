@@ -72,10 +72,15 @@ export const CyberLawChatMessage: React.FC<CyberLawChatMessageProps> = ({ messag
         )}
         {isBot && message.sources && message.sources.length > 0 && (
           <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t border-hacker-gray border-opacity-50">
-            <h4 className="text-[0.7rem] sm:text-sm font-share-tech-mono text-hacker-gray mb-0.5 sm:mb-1">Sources:</h4>
-            <ul className="list-none pl-0 space-y-0.5">
-              {message.sources.map(renderSourceLink)}
-            </ul>
+            <details className="group">
+              <summary className="text-[0.7rem] sm:text-sm font-share-tech-mono text-hacker-gray mb-0.5 sm:mb-1 cursor-pointer hover:text-hacker-green transition-colors duration-200 flex items-center gap-1">
+                <span className="inline-block transform transition-transform duration-200 group-open:rotate-90">▶</span>
+                Sources ({message.sources.length})
+              </summary>
+              <ul className="list-none pl-0 space-y-0.5 mt-1">
+                {message.sources.map(renderSourceLink)}
+              </ul>
+            </details>
           </div>
         )}
       </div>
