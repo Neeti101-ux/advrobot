@@ -1,0 +1,6 @@
+{
+  "name": "Adv. Robot",
+  "description": "An advanced platform inspired by Mr. Robot, for testing LLM jailbreaking protocols and accessing jurisdiction-specific cyber law assistance. It combines sophisticated AI security testing with real-time legal guidance for India, UAE, and UK.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
