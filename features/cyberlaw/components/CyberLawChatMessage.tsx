@@ -55,9 +55,20 @@ export const CyberLawChatMessage: React.FC<CyberLawChatMessageProps> = ({ messag
   
   const formattedTime = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+  // Process bot message text to remove duplicate sources section
+  // The expandable sources section below handles source display
+  let processedBotText = message.text;
+  if (isBot && message.text) {
+    // Remove everything from "Sources:" onwards (case-insensitive)
+    const sourcesIndex = message.text.toLowerCase().indexOf('sources:');
+    if (sourcesIndex !== -1) {
+      processedBotText = message.text.substring(0, sourcesIndex).trim();
+    }
+  }
+  
   // Use `dangerouslySetInnerHTML` for markdown after sanitizing/trusting `marked`
   // For bot messages, apply .prose-cyberlaw for markdown styling defined in index.html
-  const botResponseHtml = isBot ? marked.parse(message.text) : null;
+  const botResponseHtml = isBot ? marked.parse(processedBotText) : null;
 
   return (
     <div className={containerClass}>
