@@ -119,7 +119,14 @@ export const streamLegalAdvice = async (
       messageParts.push({ text: "Please analyze the uploaded content." });
     }
 
-    const stream = await legalChat.sendMessageStream({ parts: messageParts });
+    // Fix: Use the correct structure for sendMessageStream
+    const stream = await legalChat.sendMessageStream({
+      contents: [{
+        role: 'user',
+        parts: messageParts
+      }]
+    });
+    
     let accumulatedSources: GroundingChunk[] = [];
 
     for await (const chunk of stream) { // chunk is GenerateContentResponse
