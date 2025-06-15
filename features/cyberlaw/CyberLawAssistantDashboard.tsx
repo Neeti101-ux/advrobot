@@ -148,11 +148,6 @@ export const CyberLawAssistantDashboard: React.FC = () => {
             onToggleWebSearch={handleToggleWebSearch} 
         />
       </div>
-       {isLoading && messages.length > 0 && messages[messages.length-1]?.sender === 'bot' && messages[messages.length-1].text === "" && (
-         <div className="p-1 sm:p-2 text-center">
-            <LoadingSpinner text={`${LEXMACHINA_TYPING_MESSAGE} for ${currentJurisdictionName}...`} />
-         </div>
-       )}
     </div>
   );
 };
