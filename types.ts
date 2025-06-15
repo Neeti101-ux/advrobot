@@ -5,6 +5,13 @@ export enum View {
   CyberLaw = 'cyberlaw',
 }
 
+export interface FileAttachment {
+  name: string;
+  type: string;
+  content: string; // base64 for images, text content for other files
+  size: number;
+}
+
 export interface Message {
   id: string;
   text: string;
@@ -12,6 +19,7 @@ export interface Message {
   timestamp: string;
   glitch?: boolean; // Primarily for old jailbreak UI, might be reused or removed.
   sources?: GroundingChunk[]; // For CyberLaw assistant
+  file?: FileAttachment; // For file attachments
 }
 
 // --- JAILBREAK FEATURE TYPES ---

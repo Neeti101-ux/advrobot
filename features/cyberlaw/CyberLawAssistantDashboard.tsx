@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Jurisdiction, Message } from '../../types';
+import { Jurisdiction, Message, FileAttachment } from '../../types';
 import { JURISDICTIONS_LIST, LEXMACHINA_BOT_NAME, LEXMACHINA_TYPING_MESSAGE, DEFAULT_ERROR_MESSAGE } from '../../constants';
 import { JurisdictionSelector } from './components/JurisdictionSelector';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
@@ -55,14 +55,75 @@ export const CyberLawAssistantDashboard: React.FC = () => {
     }
   }, [isWebSearchEnabled, currentJurisdictionName, messages]);
 
+  const processFile = async (file: File): Promise<FileAttachment> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const result = e.target?.result;
+        if (!result) {
+          reject(new Error('Failed to read file'));
+          return;
+        }
 
-  const handleSendMessage = useCallback(async (userInput: string) => {
+        let content: string;
+        
+        // For images, keep as base64 data URL
+        if (file.type.startsWith('image/')) {
+          content = result as string;
+        } else {
+          // For text-based files, extract text content
+          if (typeof result === 'string') {
+            content = result;
+          } else {
+            // Convert ArrayBuffer to string for text files
+            const decoder = new TextDecoder('utf-8');
+            content = decoder.decode(result as ArrayBuffer);
+          }
+        }
+
+        resolve({
+          name: file.name,
+          type: file.type,
+          content,
+          size: file.size
+        });
+      };
+
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'));
+      };
+
+      // Read as data URL for images, as text for others
+      if (file.type.startsWith('image/')) {
+        reader.readAsDataURL(file);
+      } else {
+        reader.readAsText(file);
+      }
+    });
+  };
+
+  const handleSendMessage = useCallback(async (userInput: string, file?: File) => {
     setError(null);
+    
+    let fileAttachment: FileAttachment | undefined;
+    
+    // Process file if provided
+    if (file) {
+      try {
+        fileAttachment = await processFile(file);
+      } catch (error) {
+        setError('Failed to process uploaded file. Please try again.');
+        return;
+      }
+    }
+
     const newUserMessage: Message = {
       id: 'user-' + Date.now(),
-      text: userInput,
+      text: userInput || (file ? `[Uploaded: ${file.name}]` : ''),
       sender: 'user',
       timestamp: new Date().toISOString(),
+      file: fileAttachment
     };
     
     const updatedMessages = [...messages, newUserMessage];
@@ -84,7 +145,8 @@ export const CyberLawAssistantDashboard: React.FC = () => {
     await streamLegalAdvice(
       selectedJurisdiction,
       updatedMessages,
-      isWebSearchEnabled, 
+      isWebSearchEnabled,
+      fileAttachment,
       (chunkText, chunkSources) => {
         fullBotResponse += chunkText;
         if (chunkSources) {

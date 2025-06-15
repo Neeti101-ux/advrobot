@@ -1,11 +1,10 @@
-
 import { GoogleGenAI, GenerateContentResponse, GroundingChunk, Chat } from "@google/genai";
 import { 
     GEMINI_MODEL_LEGAL_ASSISTANT, 
     DEFAULT_ERROR_MESSAGE,
     getSystemPromptForJurisdiction
 } from '../constants';
-import { Jurisdiction, Message as AppMessage } from "../types";
+import { Jurisdiction, Message as AppMessage, FileAttachment } from "../types";
 
 // Initialize the AI client for app-specific tasks (e.g., legal assistant)
 // Assumes process.env.API_KEY is available in the execution environment
@@ -32,6 +31,7 @@ export const streamLegalAdvice = async (
   jurisdiction: Jurisdiction,
   currentMessages: AppMessage[], // Full chat history including the latest user message
   enableWebSearch: boolean,
+  fileAttachment?: FileAttachment,
   onChunk: (chunkText: string, sources?: GroundingChunk[]) => void,
   onError: (errorMsg: string) => void,
   onDone: () => void
@@ -43,9 +43,9 @@ export const streamLegalAdvice = async (
   }
 
   const systemInstruction = getSystemPromptForJurisdiction(jurisdiction, enableWebSearch);
-  const userQuery = currentMessages[currentMessages.length - 1]?.text;
-
-  if (!userQuery) {
+  const latestMessage = currentMessages[currentMessages.length - 1];
+  
+  if (!latestMessage) {
     onError("No query provided.");
     onDone();
     return;
@@ -78,7 +78,39 @@ export const streamLegalAdvice = async (
         history: historyForGemini 
     });
 
-    const stream = await legalChat.sendMessageStream({ message: userQuery }); // sendMessageStream expects {message: string} which becomes {role:'user', parts:[{text:userQuery}]}
+    // Prepare the message parts for the latest user message
+    const messageParts: any[] = [];
+    
+    // Add text content if present
+    if (latestMessage.text && latestMessage.text.trim()) {
+      messageParts.push({ text: latestMessage.text });
+    }
+    
+    // Add file content if present
+    if (fileAttachment) {
+      if (fileAttachment.type.startsWith('image/')) {
+        // For images, send as inline data
+        const base64Data = fileAttachment.content.split(',')[1]; // Remove data:image/...;base64, prefix
+        messageParts.push({
+          inlineData: {
+            mimeType: fileAttachment.type,
+            data: base64Data
+          }
+        });
+      } else {
+        // For text-based files, include content as text with context
+        messageParts.push({
+          text: `File: ${fileAttachment.name} (${fileAttachment.type})\n\nContent:\n${fileAttachment.content}`
+        });
+      }
+    }
+
+    // If no text and no file, add a default message
+    if (messageParts.length === 0) {
+      messageParts.push({ text: "Please analyze the uploaded content." });
+    }
+
+    const stream = await legalChat.sendMessageStream({ parts: messageParts });
     let accumulatedSources: GroundingChunk[] = [];
 
     for await (const chunk of stream) { // chunk is GenerateContentResponse
