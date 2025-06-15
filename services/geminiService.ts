@@ -86,17 +86,18 @@ export const streamLegalAdvice = async (
       const chunkSources = enableWebSearch ? (chunk.candidates?.[0]?.groundingMetadata?.groundingChunks || []) : [];
       
       if (chunkSources.length > 0) {
-        // Simple deduplication based on URI and Title for accumulated sources
+        // Accumulate all sources with deduplication based on URI
         chunkSources.forEach(newSource => {
-            if (!accumulatedSources.some(existingSource => 
-                existingSource.web?.uri === newSource.web?.uri && 
-                existingSource.web?.title === newSource.web?.title
+            if (newSource.web && !accumulatedSources.some(existingSource => 
+                existingSource.web?.uri === newSource.web?.uri
             )) {
                 accumulatedSources.push(newSource);
             }
         });
       }
-      onChunk(chunkText, accumulatedSources.length > 0 ? [...accumulatedSources] : undefined); // Pass a copy
+      
+      // Always pass the accumulated sources if we have any
+      onChunk(chunkText, accumulatedSources.length > 0 ? accumulatedSources : undefined);
     }
   } catch (error: any) {
     console.error(`Error getting legal advice for ${jurisdiction}:`, error);
