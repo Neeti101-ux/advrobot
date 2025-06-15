@@ -90,26 +90,25 @@ export const streamLegalAdvice = async (
     if (fileAttachment) {
       if (fileAttachment.type.startsWith('image/')) {
         // For images, send as inline data
-        const base64Data = fileAttachment.content.split(',')[1]; // Remove data:image/...;base64, prefix
+        const base64Data = fileAttachment.content.split(',')[1] || ''; // Remove data:image/...;base64, prefix, ensure it's at least empty string
         
-        // Check if base64Data is not empty before creating inlineData part
-        if (base64Data && base64Data.trim()) {
-          messageParts.push({
-            inlineData: {
-              mimeType: fileAttachment.type,
-              data: base64Data
-            }
-          });
-        } else {
-          // If base64 data is empty, add a descriptive text part instead
-          messageParts.push({
-            text: `[Empty image file: ${fileAttachment.name}]`
-          });
-        }
-      } else {
-        // For text-based files, include content as text with context
         messageParts.push({
-          text: `File: ${fileAttachment.name} (${fileAttachment.type})\n\nContent:\n${fileAttachment.content}`
+          inlineData: {
+            mimeType: fileAttachment.type,
+            data: base64Data
+          }
+        });
+      } else {
+        // For text-based files, we need to convert to base64 and send as inlineData
+        // Convert text content to base64
+        const textContent = fileAttachment.content || '';
+        const base64Content = btoa(textContent);
+        
+        messageParts.push({
+          inlineData: {
+            mimeType: fileAttachment.type,
+            data: base64Content
+          }
         });
       }
     }
