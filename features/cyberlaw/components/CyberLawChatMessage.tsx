@@ -30,6 +30,7 @@ export const CyberLawChatMessage: React.FC<CyberLawChatMessageProps> = ({ messag
   const isUser = message.sender === 'user';
   const isBot = message.sender === 'bot';
   const isSystem = message.sender === 'system';
+  const isLoadingBot = isBot && message.text === "";
 
   const baseStyle = "p-2 sm:p-3 my-1.5 sm:my-2 max-w-[85%] sm:max-w-[80%] rounded-md shadow-sm sm:shadow-md relative";
   // User messages: hacker-green text, semi-transparent hacker-green background
@@ -67,9 +68,23 @@ export const CyberLawChatMessage: React.FC<CyberLawChatMessageProps> = ({ messag
         {isUser && <span className="font-share-tech-mono text-xs sm:text-sm">{message.text}</span>}
         {isSystem && <span className="font-share-tech-mono">{message.text}</span>}
         
-        {isBot && botResponseHtml && (
+        {isBot && !isLoadingBot && botResponseHtml && (
           <div className="prose-cyberlaw" dangerouslySetInnerHTML={{ __html: botResponseHtml }} />
         )}
+        
+        {isLoadingBot && (
+          <div className="flex items-center gap-2 py-2">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-hacker-cyan rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-hacker-cyan rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-hacker-cyan rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+            <span className="text-hacker-cyan font-share-tech-mono text-xs animate-pulse">
+              Analyzing legal framework...
+            </span>
+          </div>
+        )}
+        
         {isBot && message.sources && message.sources.length > 0 && (
           <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t border-hacker-gray border-opacity-50">
             <details className="group">
