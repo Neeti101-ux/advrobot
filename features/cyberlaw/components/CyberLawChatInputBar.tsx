@@ -184,32 +184,13 @@ export const CyberLawChatInputBar: React.FC<CyberLawChatInputBarProps> = ({
       )}
       <form onSubmit={handleFormSubmit} className="p-1.5 sm:p-2 bg-hacker-border border-t border-hacker-gray">
         <div className="flex items-end sm:items-center border border-hacker-green rounded focus-within:shadow-hacker-glow-green">
-          <button
-            type="button"
-            onClick={onToggleWebSearch}
-            disabled={isLoading}
-            className={`p-1.5 sm:p-2 rounded-l focus:outline-none focus:ring-1 hover:bg-hacker-dark ${isWebSearchEnabled ? 'focus:ring-hacker-green' : 'focus:ring-hacker-gray'} disabled:opacity-50 disabled:cursor-not-allowed mr-1 self-stretch flex items-center`}
-            title={isWebSearchEnabled ? "Web Search ON (click to disable)" : "Web Search OFF (click to enable)"}
-            aria-pressed={isWebSearchEnabled}
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              strokeWidth="1.5" 
-              stroke="currentColor" 
-              className={`w-4 h-4 sm:w-5 sm:h-5 ${isWebSearchEnabled ? 'text-hacker-green animate-pulse' : 'text-hacker-gray'}`}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A11.978 11.978 0 0112 13.5c-2.998 0-5.74-1.1-7.843-2.918m0 0A8.959 8.959 0 003 12c0 .778.099 1.533.284 2.253m0 0A11.953 11.953 0 0012 10.5c2.998 0 5.74 1.1 7.843 2.918" />
-            </svg>
-          </button>
           <textarea
             ref={textareaRef}
             value={inputText}
             onInput={handleInput}
             placeholder={placeholderTextToShow}
             disabled={isLoading}
-            className="flex-grow p-1.5 sm:p-2 text-xs sm:text-sm bg-hacker-dark text-hacker-white placeholder-hacker-gray focus:outline-none focus:ring-1 focus:ring-hacker-accent focus:border-hacker-accent font-roboto-mono resize-none overflow-y-auto scrollbar-thin scrollbar-thumb-hacker-gray scrollbar-track-hacker-border transition-colors duration-200"
+            className="flex-grow p-1.5 sm:p-2 text-xs sm:text-sm bg-hacker-dark text-hacker-white placeholder-hacker-gray focus:outline-none focus:ring-1 focus:ring-hacker-accent focus:border-hacker-accent font-roboto-mono resize-none overflow-y-auto scrollbar-thin scrollbar-thumb-hacker-gray scrollbar-track-hacker-border transition-colors duration-200 rounded-l"
             rows={1} // Start with 1 row, JS will adjust
             onKeyDown={handleKeyDown}
             style={{ minHeight: '34px', maxHeight: '80px' }} // Max height for mobile

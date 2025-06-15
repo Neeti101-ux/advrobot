@@ -12,7 +12,7 @@ export const CyberLawAssistantDashboard: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState<boolean>(false); 
+  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState<boolean>(true); // Default to enabled
   
   const currentJurisdictionName = JURISDICTIONS_LIST.find(j => j.id === selectedJurisdiction)?.name || selectedJurisdiction;
 
