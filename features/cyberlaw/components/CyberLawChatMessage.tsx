@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import { Message } from '../../../types';
 import { GroundingChunk } from '@google/genai';
 import { marked } from 'marked'; // For rendering markdown
@@ -27,6 +28,9 @@ const renderSourceLink = (chunk: GroundingChunk, index: number) => {
 };
 
 export const CyberLawChatMessage: React.FC<CyberLawChatMessageProps> = ({ message }) => {
+  const [copied, setCopied] = useState(false);
+  const [feedback, setFeedback] = useState<'thumbs-up' | 'thumbs-down' | null>(null);
+  
   const isUser = message.sender === 'user';
   const isBot = message.sender === 'bot';
   const isSystem = message.sender === 'system';
@@ -69,6 +73,22 @@ export const CyberLawChatMessage: React.FC<CyberLawChatMessageProps> = ({ messag
   // Use `dangerouslySetInnerHTML` for markdown after sanitizing/trusting `marked`
   // For bot messages, apply .prose-cyberlaw for markdown styling defined in index.html
   const botResponseHtml = isBot ? marked.parse(processedBotText) : null;
+  
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(processedBotText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  };
+  
+  const handleFeedback = (type: 'thumbs-up' | 'thumbs-down') => {
+    setFeedback(feedback === type ? null : type);
+    // Here you could send feedback to analytics or logging service
+    console.log(`User feedback for message ${message.id}: ${type}`);
+  };
 
   return (
     <div className={containerClass}>
@@ -80,7 +100,68 @@ export const CyberLawChatMessage: React.FC<CyberLawChatMessageProps> = ({ messag
         {isSystem && <span className="font-share-tech-mono">{message.text}</span>}
         
         {isBot && !isLoadingBot && botResponseHtml && (
-          <div className="prose-cyberlaw" dangerouslySetInnerHTML={{ __html: botResponseHtml }} />
+          <>
+            <div className="prose-cyberlaw" dangerouslySetInnerHTML={{ __html: botResponseHtml }} />
+            
+            {/* Feedback and Copy Buttons */}
+            <div className="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-hacker-gray border-opacity-30">
+              <button
+                onClick={() => handleFeedback('thumbs-up')}
+                className={`p-1.5 rounded transition-all duration-200 hover:bg-hacker-border ${
+                  feedback === 'thumbs-up' 
+                    ? 'text-hacker-green bg-hacker-border' 
+                    : 'text-hacker-gray hover:text-hacker-green'
+                }`}
+                title="Good response"
+                aria-label="Mark response as helpful"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 10v12"/>
+                  <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/>
+                </svg>
+              </button>
+              
+              <button
+                onClick={() => handleFeedback('thumbs-down')}
+                className={`p-1.5 rounded transition-all duration-200 hover:bg-hacker-border ${
+                  feedback === 'thumbs-down' 
+                    ? 'text-hacker-red bg-hacker-border' 
+                    : 'text-hacker-gray hover:text-hacker-red'
+                }`}
+                title="Poor response"
+                aria-label="Mark response as not helpful"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 14V2"/>
+                  <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/>
+                </svg>
+              </button>
+              
+              <div className="w-px h-4 bg-hacker-gray opacity-30 mx-1"></div>
+              
+              <button
+                onClick={handleCopy}
+                className={`p-1.5 rounded transition-all duration-200 hover:bg-hacker-border ${
+                  copied 
+                    ? 'text-hacker-green bg-hacker-border' 
+                    : 'text-hacker-gray hover:text-hacker-cyan'
+                }`}
+                title={copied ? "Copied!" : "Copy response"}
+                aria-label="Copy response to clipboard"
+              >
+                {copied ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+          </>
         )}
         
         {isLoadingBot && (
