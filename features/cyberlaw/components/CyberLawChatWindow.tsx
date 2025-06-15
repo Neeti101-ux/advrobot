@@ -36,16 +36,6 @@ const EmptyState: React.FC<{ jurisdictionName: string; botName: string }> = ({ j
     <p className="text-sm sm:text-base text-hacker-gray mb-4 max-w-md">
       I'm here to assist you with cyber law queries for <span className="text-hacker-green font-semibold">{jurisdictionName}</span>.
     </p>
-    <div className="bg-hacker-border border border-hacker-gray rounded-lg p-3 sm:p-4 max-w-lg">
-      <p className="text-xs sm:text-sm text-hacker-white font-roboto-mono mb-2">
-        <span className="text-hacker-accent">💡 Try asking:</span>
-      </p>
-      <ul className="text-xs sm:text-sm text-hacker-gray space-y-1 text-left">
-        <li>• "What are the data protection laws in {jurisdictionName}?"</li>
-        <li>• "How to report a cybercrime?"</li>
-        <li>• "What constitutes online harassment?"</li>
-      </ul>
-    </div>
     <p className="text-xs text-hacker-gray mt-4 opacity-75">
       Start typing your question below to begin our conversation.
     </p>
