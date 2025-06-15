@@ -153,10 +153,6 @@ export const CyberLawAssistantDashboard: React.FC = () => {
             <LoadingSpinner text={`${LEXMACHINA_TYPING_MESSAGE} for ${currentJurisdictionName}...`} />
          </div>
        )}
-      
-      <div className="p-1.5 sm:p-2 bg-hacker-border text-center text-[0.65rem] sm:text-xs text-hacker-gray font-roboto-mono">
-        {LEXMACHINA_BOT_NAME} utilizes Gemini AI {isWebSearchEnabled ? "with web search" : ""} (web search {isWebSearchEnabled ? "enabled" : "disabled"}). Info is educational, not legal advice.
-      </div>
     </div>
   );
 };
