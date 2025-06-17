@@ -369,6 +369,19 @@
         outline: none;
     }
 
+    /* Sidebar Styles */
+    .sidebar-backdrop {
+      backdrop-filter: blur(2px);
+    }
+    
+    /* Responsive sidebar behavior */
+    @media (min-width: 1024px) { /* lg breakpoint */
+      .sidebar-container {
+        position: static !important;
+        transform: translateX(0) !important;
+      }
+    }
+
   </style>
   <script>
     tailwind.config = {
