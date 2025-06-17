@@ -25,7 +25,6 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
 }) => {
   const [promptCopied, setPromptCopied] = useState(false);
   const robotElementRef = useRef<HTMLDivElement>(null);
-  const levelFillElementRef = useRef<HTMLDivElement>(null); // Ref for the new fill element
   const [isWalkAnimationTriggered, setIsWalkAnimationTriggered] = useState(false);
 
   // Reset animation trigger when the level itself changes
@@ -35,37 +34,27 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
 
   useEffect(() => {
     const robotElement = robotElementRef.current;
-    const levelFillElement = levelFillElementRef.current;
-    if (!robotElement || !levelFillElement) return;
+    if (!robotElement) return;
 
     const walkAnimationDurationSeconds = calculateAnimationSpeed(level.id);
     const walkAnimationDurationMs = walkAnimationDurationSeconds * 1000;
 
     // Clear previous dynamic styles and classes to ensure clean state for animations
     robotElement.classList.remove('robot-walking', 'robot-success');
-    levelFillElement.style.animation = 'none';
-    levelFillElement.style.width = '0%'; // Reset fill
-    levelFillElement.style.backgroundColor = 'rgba(214, 40, 40, 0.3)'; // Reset fill color
     
     robotElement.style.animation = 'none'; // Stop any ongoing CSS animations explicitly
     void robotElement.offsetWidth; // Force reflow/repaint
-    void levelFillElement.offsetWidth;
 
 
     if (level.isCompleted) {
       // If level is already marked as completed, directly show success state
       robotElement.classList.add('robot-success');
       robotElement.style.animation = ''; // Let the CSS class define the animation
-      
-      levelFillElement.style.width = '100%';
-      levelFillElement.style.backgroundColor = 'rgba(23, 195, 178, 0.4)';
     } else if (isWalkAnimationTriggered) {
       // User has checked the box, start walking animation
       robotElement.classList.add('robot-walking');
       robotElement.style.setProperty('--progress-advance-duration', `${walkAnimationDurationSeconds}s`);
       robotElement.style.animation = ''; // Let the CSS class define the animation
-      
-      levelFillElement.style.setProperty('--progress-advance-duration', `${walkAnimationDurationSeconds}s`);
 
       const walkEndTimer = setTimeout(() => {
         onReportSuccess(); 
@@ -77,7 +66,6 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
       robotElement.style.backgroundImage = 'var(--robot-walking-sprite)';
       robotElement.style.backgroundPosition = '0 0';
       robotElement.style.left = '0'; 
-      levelFillElement.style.width = '0%'; // Ensure fill is 0
     }
   }, [level.id, level.isCompleted, isWalkAnimationTriggered, onReportSuccess]);
 
@@ -108,7 +96,6 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
       {/* Animation Box */}
       <div className="robot-progress-container mb-1.5 sm:mb-2 md:mb-4">
         <div ref={robotElementRef} className="robot-animation-element"></div>
-        <div ref={levelFillElementRef} className="robot-level-fill"></div>
       </div>
       
       <div className="mb-1 text-center min-h-[18px] sm:min-h-[20px] md:min-h-[24px]">
