@@ -95,7 +95,13 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
 
       {/* Animation Box */}
       <div className="robot-progress-container mb-1.5 sm:mb-2 md:mb-4">
-        <div ref={robotElementRef} className="robot-animation-element"></div>
+        <div className="flex items-center justify-center h-full">
+          <img 
+            src="/Animated robot.gif" 
+            alt="Animated Robot" 
+            className="h-12 w-auto object-contain"
+          />
+        </div>
       </div>
       
       <div className="mb-1 text-center min-h-[18px] sm:min-h-[20px] md:min-h-[24px]">
