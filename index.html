@@ -145,115 +145,27 @@
       height: 100%;
       width: 0%; /* Initial state */
       background-color: rgba(214, 40, 40, 0.3); /* Subdued hacker-red for pending fill */
-      transition: background-color 0.5s ease-in-out; /* Smooth color change on success */
+      transition: width 3s ease-in-out, background-color 0.5s ease-in-out; /* Smooth animations */
+      z-index: 0; /* Behind the robot */
     }
 
-    .robot-animation-element {
+    /* Robot animation styles for the GIF-based implementation */
+    .robot-container {
       position: absolute;
-      width: 30px;   /* Smaller robot for mobile */
-      height: 30px;
-      top: 10px;     /* Adjust vertical centering for new height */
-      left: 0;       /* Start at the left */
-      background-repeat: no-repeat;
-      image-rendering: pixelated; /* Keep SVG sharp */
-      z-index: 1; /* Ensure robot is above the fill */
-      background-size: 60px 30px; /* Adjusted sprite size for smaller robot */
-    }
-    @media (min-width: 640px) { /* sm breakpoint */
-      .robot-animation-element {
-        width: 40px;
-        height: 40px;
-        top: 10px;
-        background-size: 80px 40px; /* Original sprite size */
-      }
-    }
-
-
-    .robot-animation-element.robot-walking + .robot-level-fill {
-      animation: fillLevelProgress var(--progress-advance-duration) ease-in-out forwards;
-    }
-    .robot-animation-element.robot-success + .robot-level-fill {
-      width: 100%;
-      background-color: rgba(23, 195, 178, 0.4); /* Subdued hacker-green for success fill */
-    }
-
-
-    .robot-walking {
-      background-image: var(--robot-walking-sprite);
-      /* Animation: sprite sheet, movement */
-      animation: 
-        robotWalkSprite 0.5s steps(2) infinite, /* 2 frames in sprite */
-        progressAdvance var(--progress-advance-duration) ease-in-out forwards;
-    }
-
-    .robot-success {
-      background-image: var(--robot-safe-sprite); /* Initial state for transform */
-      /* Animation: transformation to success state */
-      animation: robotTransformSuccess 1.5s ease-in-out forwards;
-    }
-    /* Adjust robot success position based on its size */
-    .robot-success {
-      left: calc(100% - 30px);
-    }
-    @media (min-width: 640px) { /* sm breakpoint */
-      .robot-success {
-        left: calc(100% - 40px);
-      }
+      top: 50%;
+      left: 8px;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      z-index: 1; /* Above the progress fill */
+      transition: transform 3s ease-in-out; /* Smooth movement */
     }
     
-    @keyframes robotWalkSprite {
-      0% { background-position: 0 0; }
-      100% { background-position: -60px 0; } /* 2 frames * 30px width (mobile) */
-    }
-    @media (min-width: 640px) { /* sm breakpoint */
-        @keyframes robotWalkSprite {
-        0% { background-position: 0 0; }
-        100% { background-position: -80px 0; } /* 2 frames * 40px width */
-        }
-    }
-
-
-     @keyframes progressAdvance {
-      0% { left: 0; }
-      100% { left: calc(100% - 30px); } /* Robot stops at the right edge of container (mobile) */
-    }
-     @media (min-width: 640px) { /* sm breakpoint */
-        @keyframes progressAdvance {
-        0% { left: 0; }
-        100% { left: calc(100% - 40px); } /* Original stopping point */
-        }
-    }
-
-
-    @keyframes fillLevelProgress {
-      0% { width: 0%; }
-      100% { width: 100%; }
-    }
-
-    @keyframes robotTransformSuccess {
-      0% { 
-        filter: hue-rotate(0deg) brightness(1);
-        transform: scale(1) translateX(0); 
-        background-image: var(--robot-walking-sprite); 
-         background-position: -30px 0; /* Last frame of walk (mobile) */
+    @media (max-width: 640px) {
+      .robot-container {
+        width: 30px;
+        height: 30px;
       }
-      50% { 
-        filter: hue-rotate(120deg) brightness(1.5); /* Transition to green-ish */
-        transform: scale(1.1) translateX(0);
-      }
-      100% { 
-        filter: hue-rotate(120deg) brightness(1.2);
-        transform: scale(1) translateX(0);
-        background-image: var(--robot-safe-sprite); /* Final safe state image */
-        background-position: 0 0; /* Ensure correct display of single frame */
-      }
-    }
-    @media (min-width: 640px) { /* sm breakpoint */
-        @keyframes robotTransformSuccess {
-        0% { background-position: -40px 0; /* Original last frame */ }
-        50% { /* same */ }
-        100% { /* same */ }
-        }
     }
 
     /* Overall Progress Bar Styles (for JailbreakDashboard) */

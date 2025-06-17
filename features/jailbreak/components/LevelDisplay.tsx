@@ -25,6 +25,7 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
 }) => {
   const [promptCopied, setPromptCopied] = useState(false);
   const robotElementRef = useRef<HTMLDivElement>(null);
+  const progressFillRef = useRef<HTMLDivElement>(null);
   const [isWalkAnimationTriggered, setIsWalkAnimationTriggered] = useState(false);
 
   // Reset animation trigger when the level itself changes
@@ -34,41 +35,52 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
 
   useEffect(() => {
     const robotElement = robotElementRef.current;
-    if (!robotElement) return;
+    const progressFill = progressFillRef.current;
+    if (!robotElement || !progressFill) return;
 
     const walkAnimationDurationSeconds = calculateAnimationSpeed(level.id);
     const walkAnimationDurationMs = walkAnimationDurationSeconds * 1000;
 
-    // Clear previous dynamic styles and classes to ensure clean state for animations
-    robotElement.classList.remove('robot-walking', 'robot-success');
-    
-    robotElement.style.animation = 'none'; // Stop any ongoing CSS animations explicitly
-    void robotElement.offsetWidth; // Force reflow/repaint
-
+    // Reset styles
+    robotElement.style.transform = '';
+    robotElement.style.transition = '';
+    progressFill.style.width = '';
+    progressFill.style.backgroundColor = '';
+    progressFill.style.transition = '';
 
     if (level.isCompleted) {
-      // If level is already marked as completed, directly show success state
-      robotElement.classList.add('robot-success');
-      robotElement.style.animation = ''; // Let the CSS class define the animation
+      // Level is completed - robot at the end, green fill
+      robotElement.style.transform = 'translateX(calc(100vw - 100% - 20px))';
+      progressFill.style.width = '100%';
+      progressFill.style.backgroundColor = 'rgba(23, 195, 178, 0.4)'; // hacker-green
     } else if (isWalkAnimationTriggered) {
-      // User has checked the box, start walking animation
-      robotElement.classList.add('robot-walking');
-      robotElement.style.setProperty('--progress-advance-duration', `${walkAnimationDurationSeconds}s`);
-      robotElement.style.animation = ''; // Let the CSS class define the animation
+      // Start animation
+      robotElement.style.transition = `transform ${walkAnimationDurationSeconds}s ease-in-out`;
+      progressFill.style.transition = `width ${walkAnimationDurationSeconds}s ease-in-out, background-color 0.5s ease-in-out`;
+      
+      // Trigger animation
+      setTimeout(() => {
+        if (robotElement && progressFill) {
+          robotElement.style.transform = 'translateX(calc(100vw - 100% - 20px))';
+          progressFill.style.width = '100%';
+        }
+      }, 50);
 
       const walkEndTimer = setTimeout(() => {
+        if (progressFill) {
+          progressFill.style.backgroundColor = 'rgba(23, 195, 178, 0.4)'; // Change to green
+        }
         onReportSuccess(); 
       }, walkAnimationDurationMs);
 
       return () => clearTimeout(walkEndTimer); 
     } else {
-      // Level is not completed, and walk animation not triggered: Robot is static
-      robotElement.style.backgroundImage = 'var(--robot-walking-sprite)';
-      robotElement.style.backgroundPosition = '0 0';
-      robotElement.style.left = '0'; 
+      // Initial state - robot at start, no fill
+      robotElement.style.transform = 'translateX(0)';
+      progressFill.style.width = '0%';
+      progressFill.style.backgroundColor = 'rgba(214, 40, 40, 0.3)'; // hacker-red
     }
   }, [level.id, level.isCompleted, isWalkAnimationTriggered, onReportSuccess]);
-
 
   const handleCopyPrompt = () => {
     navigator.clipboard.writeText(level.instructionPrompt)
@@ -95,11 +107,34 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
 
       {/* Animation Box */}
       <div className="robot-progress-container mb-1.5 sm:mb-2 md:mb-4">
-        <div className="flex items-center justify-center h-full">
+        {/* Progress Fill Background */}
+        <div 
+          ref={progressFillRef}
+          className="robot-level-fill"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100%',
+            width: '0%',
+            backgroundColor: 'rgba(214, 40, 40, 0.3)',
+            zIndex: 0
+          }}
+        />
+        
+        {/* Animated Robot */}
+        <div 
+          ref={robotElementRef}
+          className="absolute top-1/2 left-2 transform -translate-y-1/2 z-10"
+          style={{
+            width: '40px',
+            height: '40px'
+          }}
+        >
           <img 
             src="/Animated robot.gif" 
             alt="Animated Robot" 
-            className="h-12 w-auto object-contain"
+            className="w-full h-full object-contain"
           />
         </div>
       </div>
