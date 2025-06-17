@@ -168,9 +168,16 @@ const App: React.FC = () => {
               </svg>
             </button>
             
-            <h1 className="text-base sm:text-lg md:text-xl font-share-tech-mono text-hacker-accent">
-              {APP_TITLE}
-            </h1>
+            <div className="flex items-center gap-2">
+              <img 
+                src="/AdvRobot Logo.png" 
+                alt="Adv.Robot Logo" 
+                className="h-8 w-auto sm:h-10 md:h-12"
+              />
+              <h1 className="text-base sm:text-lg md:text-xl font-share-tech-mono text-hacker-accent">
+                {APP_TITLE}
+              </h1>
+            </div>
           </div>
           
           <span className="text-xs text-hacker-gray font-roboto-mono hidden sm:block">
