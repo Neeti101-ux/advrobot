@@ -168,6 +168,43 @@
       }
     }
 
+    /* Ensure robot animation works consistently across all levels */
+    .robot-progress-container .robot-animation-element {
+      position: absolute;
+      top: 50%;
+      left: 8px;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      z-index: 10;
+      transition: transform var(--animation-duration, 3s) ease-in-out;
+    }
+    
+    @media (max-width: 640px) {
+      .robot-progress-container .robot-animation-element {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    /* Animation states for all levels */
+    .robot-progress-container.level-completed .robot-animation-element {
+      transform: translateY(-50%) translateX(calc(100% - 56px));
+    }
+    
+    .robot-progress-container.level-animating .robot-animation-element {
+      transform: translateY(-50%) translateX(calc(100% - 56px));
+    }
+    
+    .robot-progress-container.level-animating .robot-level-fill {
+      width: 100%;
+    }
+    
+    .robot-progress-container.level-completed .robot-level-fill {
+      width: 100%;
+      background-color: rgba(23, 195, 178, 0.4) !important;
+    }
+
     /* Overall Progress Bar Styles (for JailbreakDashboard) */
     .overall-progress-bar-container {
       width: 100%;

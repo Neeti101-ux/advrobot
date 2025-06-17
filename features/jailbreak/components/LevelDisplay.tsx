@@ -50,7 +50,10 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
 
     if (level.isCompleted) {
       // Level is completed - robot at the end, green fill
-      robotElement.style.transform = 'translateX(calc(100vw - 100% - 20px))';
+      const containerWidth = robotElement.parentElement?.offsetWidth || 300;
+      const robotWidth = robotElement.offsetWidth || 40;
+      const maxTranslateX = containerWidth - robotWidth - 16; // 16px padding from right edge
+      robotElement.style.transform = `translateX(${maxTranslateX}px)`;
       progressFill.style.width = '100%';
       progressFill.style.backgroundColor = 'rgba(23, 195, 178, 0.4)'; // hacker-green
     } else if (isWalkAnimationTriggered) {
@@ -61,7 +64,10 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
       // Trigger animation
       setTimeout(() => {
         if (robotElement && progressFill) {
-          robotElement.style.transform = 'translateX(calc(100vw - 100% - 20px))';
+          const containerWidth = robotElement.parentElement?.offsetWidth || 300;
+          const robotWidth = robotElement.offsetWidth || 40;
+          const maxTranslateX = containerWidth - robotWidth - 16; // 16px padding from right edge
+          robotElement.style.transform = `translateX(${maxTranslateX}px)`;
           progressFill.style.width = '100%';
         }
       }, 50);
@@ -106,7 +112,15 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
       <p className="text-[0.7rem] sm:text-xs text-hacker-gray mb-1.5 sm:mb-2 md:mb-3 font-roboto-mono">{level.description}</p>
 
       {/* Animation Box */}
-      <div className="robot-progress-container mb-1.5 sm:mb-2 md:mb-4">
+      <div 
+        className={`robot-progress-container mb-1.5 sm:mb-2 md:mb-4 ${
+          level.isCompleted ? 'level-completed' : 
+          isWalkAnimationTriggered ? 'level-animating' : ''
+        }`}
+        style={{
+          '--animation-duration': `${calculateAnimationSpeed(level.id)}s`
+        } as React.CSSProperties}
+      >
         {/* Progress Fill Background */}
         <div 
           ref={progressFillRef}
@@ -125,7 +139,7 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
         {/* Animated Robot */}
         <div 
           ref={robotElementRef}
-          className="absolute top-1/2 left-2 transform -translate-y-1/2 z-10"
+          className="robot-animation-element"
           style={{
             width: '40px',
             height: '40px'
