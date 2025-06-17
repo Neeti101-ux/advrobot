@@ -36,7 +36,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         fixed top-0 left-0 h-full w-80 bg-hacker-border border-r border-hacker-gray z-50
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto
       `}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
@@ -46,7 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </h2>
             <button
               onClick={onClose}
-              className="lg:hidden p-1 text-hacker-gray hover:text-hacker-red transition-colors"
+              className="p-1 text-hacker-gray hover:text-hacker-red transition-colors"
               aria-label="Close sidebar"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

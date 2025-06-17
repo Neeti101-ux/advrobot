@@ -24,13 +24,13 @@ const App: React.FC = () => {
       />
       
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 overflow-hidden lg:ml-0">
+      <div className="flex flex-col flex-1 overflow-hidden">
         <header className="p-2 sm:p-3 bg-hacker-border shadow-md flex justify-between items-center">
           <div className="flex items-center gap-3">
             {/* Hamburger Menu Button */}
             <button
               onClick={toggleSidebar}
-              className="lg:hidden p-2 text-hacker-gray hover:text-hacker-green transition-colors"
+              className="p-2 text-hacker-gray hover:text-hacker-green transition-colors"
               aria-label="Toggle sidebar"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
