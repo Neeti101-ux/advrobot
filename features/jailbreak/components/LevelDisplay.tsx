@@ -31,6 +31,24 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
   // Reset animation trigger when the level itself changes
   useEffect(() => {
     setIsWalkAnimationTriggered(false);
+    
+    // Force reset robot position when level changes
+    const robotElement = robotElementRef.current;
+    const progressFill = progressFillRef.current;
+    if (robotElement && progressFill) {
+      // Clear any existing transitions
+      robotElement.style.transition = 'none';
+      progressFill.style.transition = 'none';
+      
+      // Reset to initial position immediately
+      robotElement.style.transform = 'translateX(0)';
+      progressFill.style.width = '0%';
+      progressFill.style.backgroundColor = 'rgba(214, 40, 40, 0.3)';
+      
+      // Force a reflow to ensure the reset is applied
+      void robotElement.offsetHeight;
+      void progressFill.offsetHeight;
+    }
   }, [level.id]);
 
   useEffect(() => {
@@ -47,6 +65,11 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
     progressFill.style.width = '';
     progressFill.style.backgroundColor = '';
     progressFill.style.transition = '';
+
+    // Always start from the left position for any level change
+    robotElement.style.transform = 'translateX(0)';
+    progressFill.style.width = '0%';
+    progressFill.style.backgroundColor = 'rgba(214, 40, 40, 0.3)';
 
     if (level.isCompleted) {
       // Level is completed - robot at the end, green fill
@@ -80,11 +103,6 @@ export const LevelDisplay: React.FC<LevelDisplayProps> = ({
       }, walkAnimationDurationMs);
 
       return () => clearTimeout(walkEndTimer); 
-    } else {
-      // Initial state - robot at start, no fill
-      robotElement.style.transform = 'translateX(0)';
-      progressFill.style.width = '0%';
-      progressFill.style.backgroundColor = 'rgba(214, 40, 40, 0.3)'; // hacker-red
     }
   }, [level.id, level.isCompleted, isWalkAnimationTriggered, onReportSuccess]);
 
