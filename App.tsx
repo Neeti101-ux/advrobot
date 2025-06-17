@@ -64,19 +64,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-        </div>
-      </header>
-
-      <main className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-hacker-gray scrollbar-track-hacker-border">
-        {currentView === View.Jailbreak && <JailbreakDashboard />}
-        {currentView === View.CyberLaw && <CyberLawAssistantDashboard />}
-      </main>
-      
-      <footer className="p-1.5 sm:p-2 bg-hacker-border text-center text-[0.65rem] sm:text-xs text-hacker-gray font-roboto-mono">
-        System Status: <span className="text-hacker-green">OPERATIONAL</span> | v0.2.1 (Mobile-Enhanced)
-      </footer>
-    </div>
-  );
-};
-
-export default App;
