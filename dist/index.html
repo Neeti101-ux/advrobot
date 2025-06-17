@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Adv. Robot</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='20' y='20' width='60' height='50' rx='5' fill='%2317C3B2'/%3E%3Crect x='30' y='70' width='40' height='10' rx='3' fill='%236C757D'/%3E%3Ccircle cx='35' cy='40' r='8' fill='%230C0C0C'/%3E%3Ccircle cx='65' cy='40' r='8' fill='%230C0C0C'/%3E%3Crect x='40' y='5' width='20' height='15' fill='%236C757D'/%3E%3Crect x='45' y='0' width='10' height='5' fill='%23D62828'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/png" href="/AdvRobot Logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto+Mono&display=swap" rel="stylesheet">
   <style>
@@ -145,115 +145,64 @@
       height: 100%;
       width: 0%; /* Initial state */
       background-color: rgba(214, 40, 40, 0.3); /* Subdued hacker-red for pending fill */
-      transition: background-color 0.5s ease-in-out; /* Smooth color change on success */
+      transition: width 3s ease-in-out, background-color 0.5s ease-in-out; /* Smooth animations */
+      z-index: 0; /* Behind the robot */
     }
 
-    .robot-animation-element {
+    /* Robot animation styles for the GIF-based implementation */
+    .robot-container {
       position: absolute;
-      width: 30px;   /* Smaller robot for mobile */
-      height: 30px;
-      top: 10px;     /* Adjust vertical centering for new height */
-      left: 0;       /* Start at the left */
-      background-repeat: no-repeat;
-      image-rendering: pixelated; /* Keep SVG sharp */
-      z-index: 1; /* Ensure robot is above the fill */
-      background-size: 60px 30px; /* Adjusted sprite size for smaller robot */
-    }
-    @media (min-width: 640px) { /* sm breakpoint */
-      .robot-animation-element {
-        width: 40px;
-        height: 40px;
-        top: 10px;
-        background-size: 80px 40px; /* Original sprite size */
-      }
-    }
-
-
-    .robot-animation-element.robot-walking + .robot-level-fill {
-      animation: fillLevelProgress var(--progress-advance-duration) ease-in-out forwards;
-    }
-    .robot-animation-element.robot-success + .robot-level-fill {
-      width: 100%;
-      background-color: rgba(23, 195, 178, 0.4); /* Subdued hacker-green for success fill */
-    }
-
-
-    .robot-walking {
-      background-image: var(--robot-walking-sprite);
-      /* Animation: sprite sheet, movement */
-      animation: 
-        robotWalkSprite 0.5s steps(2) infinite, /* 2 frames in sprite */
-        progressAdvance var(--progress-advance-duration) ease-in-out forwards;
-    }
-
-    .robot-success {
-      background-image: var(--robot-safe-sprite); /* Initial state for transform */
-      /* Animation: transformation to success state */
-      animation: robotTransformSuccess 1.5s ease-in-out forwards;
-    }
-    /* Adjust robot success position based on its size */
-    .robot-success {
-      left: calc(100% - 30px);
-    }
-    @media (min-width: 640px) { /* sm breakpoint */
-      .robot-success {
-        left: calc(100% - 40px);
-      }
+      top: 50%;
+      left: 8px;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      z-index: 1; /* Above the progress fill */
+      transition: transform 3s ease-in-out; /* Smooth movement */
     }
     
-    @keyframes robotWalkSprite {
-      0% { background-position: 0 0; }
-      100% { background-position: -60px 0; } /* 2 frames * 30px width (mobile) */
-    }
-    @media (min-width: 640px) { /* sm breakpoint */
-        @keyframes robotWalkSprite {
-        0% { background-position: 0 0; }
-        100% { background-position: -80px 0; } /* 2 frames * 40px width */
-        }
-    }
-
-
-     @keyframes progressAdvance {
-      0% { left: 0; }
-      100% { left: calc(100% - 30px); } /* Robot stops at the right edge of container (mobile) */
-    }
-     @media (min-width: 640px) { /* sm breakpoint */
-        @keyframes progressAdvance {
-        0% { left: 0; }
-        100% { left: calc(100% - 40px); } /* Original stopping point */
-        }
-    }
-
-
-    @keyframes fillLevelProgress {
-      0% { width: 0%; }
-      100% { width: 100%; }
-    }
-
-    @keyframes robotTransformSuccess {
-      0% { 
-        filter: hue-rotate(0deg) brightness(1);
-        transform: scale(1) translateX(0); 
-        background-image: var(--robot-walking-sprite); 
-         background-position: -30px 0; /* Last frame of walk (mobile) */
-      }
-      50% { 
-        filter: hue-rotate(120deg) brightness(1.5); /* Transition to green-ish */
-        transform: scale(1.1) translateX(0);
-      }
-      100% { 
-        filter: hue-rotate(120deg) brightness(1.2);
-        transform: scale(1) translateX(0);
-        background-image: var(--robot-safe-sprite); /* Final safe state image */
-        background-position: 0 0; /* Ensure correct display of single frame */
+    @media (max-width: 640px) {
+      .robot-container {
+        width: 30px;
+        height: 30px;
       }
     }
-    @media (min-width: 640px) { /* sm breakpoint */
-        @keyframes robotTransformSuccess {
-        0% { background-position: -40px 0; /* Original last frame */ }
-        50% { /* same */ }
-        100% { /* same */ }
-        }
+
+    /* Ensure robot animation works consistently across all levels */
+    .robot-progress-container .robot-animation-element {
+      position: absolute;
+      top: 50%;
+      left: 8px;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      z-index: 10;
+      transition: transform var(--animation-duration, 3s) ease-in-out;
+    }
+    
+    @media (max-width: 640px) {
+      .robot-progress-container .robot-animation-element {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    /* Animation states for all levels */
+    .robot-progress-container.level-completed .robot-animation-element {
+      transform: translateY(-50%) translateX(calc(100% - 56px));
+    }
+    
+    .robot-progress-container.level-animating .robot-animation-element {
+      transform: translateY(-50%) translateX(calc(100% - 56px));
+    }
+    
+    .robot-progress-container.level-animating .robot-level-fill {
+      width: 100%;
+    }
+    
+    .robot-progress-container.level-completed .robot-level-fill {
+      width: 100%;
+      background-color: rgba(23, 195, 178, 0.4) !important;
     }
 
     /* Overall Progress Bar Styles (for JailbreakDashboard) */
@@ -369,6 +318,19 @@
         outline: none;
     }
 
+    /* Sidebar Styles */
+    .sidebar-backdrop {
+      backdrop-filter: blur(2px);
+    }
+    
+    /* Responsive sidebar behavior */
+    @media (min-width: 1024px) { /* lg breakpoint */
+      .sidebar-container {
+        position: static !important;
+        transform: translateX(0) !important;
+      }
+    }
+
   </style>
   <script>
     tailwind.config = {
@@ -441,7 +403,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/assets/index-JQGtDhd4.js"></script>
+  <script type="module" crossorigin src="/assets/index-CvHgk33W.js"></script>
 </head>
 <body class="bg-hacker-dark text-hacker-white font-roboto-mono">
   <div id="root"></div>
