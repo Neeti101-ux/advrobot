@@ -8,11 +8,15 @@ import { APP_TITLE } from './constants';
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.CyberLaw);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [chatResetTrigger, setChatResetTrigger] = useState<number>(0);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
   };
 
+  const handleNewChat = () => {
+    setChatResetTrigger(prev => prev + 1);
+  };
   return (
     <div className="flex h-full overflow-hidden">
       {/* Sidebar */}
@@ -21,6 +25,7 @@ const App: React.FC = () => {
         onClose={() => setIsSidebarOpen(false)}
         currentView={currentView}
         setCurrentView={setCurrentView}
+        onNewChat={handleNewChat}
       />
       
       {/* Main Content Area */}
@@ -52,7 +57,7 @@ const App: React.FC = () => {
 
         <main className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-hacker-gray scrollbar-track-hacker-border">
           {currentView === View.Jailbreak && <JailbreakDashboard />}
-          {currentView === View.CyberLaw && <CyberLawAssistantDashboard />}
+          {currentView === View.CyberLaw && <CyberLawAssistantDashboard key={chatResetTrigger} />}
         </main>
         
         <footer className="p-1.5 sm:p-2 bg-hacker-border text-center text-[0.65rem] sm:text-xs text-hacker-gray font-roboto-mono lg:hidden">

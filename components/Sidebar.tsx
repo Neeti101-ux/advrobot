@@ -7,19 +7,29 @@ interface SidebarProps {
   onClose: () => void;
   currentView: View;
   setCurrentView: (view: View) => void;
+  onNewChat: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   isOpen, 
   onClose, 
   currentView, 
-  setCurrentView 
+  setCurrentView,
+  onNewChat
 }) => {
   const handleViewChange = (view: View) => {
     setCurrentView(view);
     onClose(); // Close sidebar after selection on mobile
   };
 
+  const handleNewChat = () => {
+    // Switch to Cyber Law view if not already there
+    if (currentView !== View.CyberLaw) {
+      setCurrentView(View.CyberLaw);
+    }
+    onNewChat();
+    onClose(); // Close sidebar after action
+  };
   return (
     <>
       {/* Backdrop */}
@@ -109,10 +119,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Chat History Section */}
           <div className="flex-1 p-4 overflow-y-auto">
-            <h3 className="text-sm font-share-tech-mono text-hacker-gray mb-3 uppercase">
-              Chat History
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-share-tech-mono text-hacker-gray uppercase">
+                Chat History
+              </h3>
+              <button
+                onClick={handleNewChat}
+                className="p-1.5 rounded transition-all duration-200 text-hacker-gray hover:text-hacker-cyan hover:bg-hacker-dark border border-transparent hover:border-hacker-cyan"
+                title="Start new chat"
+                aria-label="Start new chat with Cyber Law AI"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14"/>
+                  <path d="M5 12h14"/>
+                </svg>
+              </button>
+            </div>
             <div className="space-y-2">
+              {/* New Chat Button */}
+              <button
+                onClick={handleNewChat}
+                className="w-full text-left p-2.5 rounded transition-all duration-200 font-share-tech-mono text-xs border border-dashed border-hacker-gray hover:border-hacker-cyan hover:bg-hacker-dark text-hacker-gray hover:text-hacker-cyan"
+              >
+                <div className="flex items-center gap-2">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 5v14"/>
+                    <path d="M5 12h14"/>
+                  </svg>
+                  <span>New Chat</span>
+                </div>
+              </button>
+              
               {/* Placeholder for chat history - this would be populated with actual chat sessions */}
               <div className="text-xs text-hacker-gray italic">
                 No chat history available yet.
