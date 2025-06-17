@@ -1,6 +1,5 @@
 import React from 'react';
-import { View } from '../types';
-import { TabButton } from './TabButton';
+import { View, ChatSession } from '../types';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -8,6 +7,10 @@ interface SidebarProps {
   currentView: View;
   setCurrentView: (view: View) => void;
   onNewChat: () => void;
+  chatSessions: ChatSession[];
+  currentChatSessionId: string;
+  onSelectChatSession: (sessionId: string) => void;
+  onDeleteChatSession: (sessionId: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -15,7 +18,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onClose, 
   currentView, 
   setCurrentView,
-  onNewChat
+  onNewChat,
+  chatSessions,
+  currentChatSessionId,
+  onSelectChatSession,
+  onDeleteChatSession
 }) => {
   const handleViewChange = (view: View) => {
     setCurrentView(view);
@@ -23,13 +30,54 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleNewChat = () => {
-    // Switch to Cyber Law view if not already there
-    if (currentView !== View.CyberLaw) {
-      setCurrentView(View.CyberLaw);
-    }
     onNewChat();
     onClose(); // Close sidebar after action
   };
+
+  const handleSelectChat = (sessionId: string) => {
+    onSelectChatSession(sessionId);
+    onClose(); // Close sidebar after selection on mobile
+  };
+
+  const handleDeleteChat = (e: React.MouseEvent, sessionId: string) => {
+    e.stopPropagation(); // Prevent triggering the select action
+    if (window.confirm('Are you sure you want to delete this chat?')) {
+      onDeleteChatSession(sessionId);
+    }
+  };
+
+  const formatChatTitle = (session: ChatSession): string => {
+    if (session.title !== 'New Chat') {
+      return session.title;
+    }
+    
+    // If it's still "New Chat", try to use the first user message
+    const firstUserMessage = session.messages.find(msg => msg.sender === 'user');
+    if (firstUserMessage) {
+      // Truncate long messages
+      const truncated = firstUserMessage.text.length > 30 
+        ? firstUserMessage.text.substring(0, 30) + '...'
+        : firstUserMessage.text;
+      return truncated;
+    }
+    
+    return 'New Chat';
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (diffInHours < 24 * 7) {
+      return date.toLocaleDateString([], { weekday: 'short' });
+    } else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -135,6 +183,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </svg>
               </button>
             </div>
+            
             <div className="space-y-2">
               {/* New Chat Button */}
               <button
@@ -150,13 +199,54 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </button>
               
-              {/* Placeholder for chat history - this would be populated with actual chat sessions */}
-              <div className="text-xs text-hacker-gray italic">
-                No chat history available yet.
-              </div>
-              <div className="text-xs text-hacker-gray opacity-75">
-                Start a conversation in Cyber Law AI to see your chat history here.
-              </div>
+              {/* Chat Sessions List */}
+              {chatSessions.length > 0 ? (
+                chatSessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className={`group relative p-2.5 rounded transition-all duration-200 font-share-tech-mono text-xs cursor-pointer border
+                      ${session.id === currentChatSessionId
+                        ? 'bg-hacker-cyan text-hacker-dark border-hacker-cyan'
+                        : 'text-hacker-gray hover:text-hacker-cyan hover:bg-hacker-dark border-transparent hover:border-hacker-gray'
+                      }`}
+                    onClick={() => handleSelectChat(session.id)}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">
+                          {formatChatTitle(session)}
+                        </div>
+                        <div className={`text-xs opacity-75 flex items-center gap-1 mt-0.5
+                          ${session.id === currentChatSessionId ? 'text-hacker-dark' : 'text-hacker-gray'}
+                        `}>
+                          <span className="truncate">{session.jurisdiction}</span>
+                          <span>•</span>
+                          <span>{formatDate(session.updatedAt)}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Delete Button */}
+                      <button
+                        onClick={(e) => handleDeleteChat(e, session.id)}
+                        className={`opacity-0 group-hover:opacity-100 p-1 rounded transition-all duration-200 hover:bg-hacker-red hover:text-white
+                          ${session.id === currentChatSessionId ? 'text-hacker-dark hover:text-white' : 'text-hacker-gray'}
+                        `}
+                        title="Delete chat"
+                        aria-label="Delete chat"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="3,6 5,6 21,6"/>
+                          <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-xs text-hacker-gray italic">
+                  No chat history available yet.
+                </div>
+              )}
             </div>
           </div>
 

@@ -14,6 +14,15 @@ export interface Message {
   sources?: GroundingChunk[]; // For CyberLaw assistant
 }
 
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  jurisdiction: Jurisdiction;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // --- JAILBREAK FEATURE TYPES ---
 // Old ProtocolId, JailbreakProtocol, JailbreakTest, TestResult might be deprecated or heavily modified.
 // For now, keeping them in case any concept is reused, but the new structure is below.

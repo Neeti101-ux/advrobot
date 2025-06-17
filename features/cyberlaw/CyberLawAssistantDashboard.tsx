@@ -1,20 +1,44 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Jurisdiction, Message } from '../../types';
+import { Jurisdiction, Message, ChatSession } from '../../types';
 import { JURISDICTIONS_LIST, LEXMACHINA_BOT_NAME, LEXMACHINA_TYPING_MESSAGE, DEFAULT_ERROR_MESSAGE } from '../../constants';
 import { JurisdictionSelector } from './components/JurisdictionSelector';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { streamLegalAdvice } from '../../services/geminiService';
-import { CyberLawChatWindow } from './components/CyberLawChatWindow'; // New component
+import { CyberLawChatWindow } from './components/CyberLawChatWindow';
 import { GroundingChunk } from '@google/genai';
 
-export const CyberLawAssistantDashboard: React.FC = () => {
-  const [selectedJurisdiction, setSelectedJurisdiction] = useState<Jurisdiction>(Jurisdiction.India);
-  const [messages, setMessages] = useState<Message[]>([]);
+interface CyberLawAssistantDashboardProps {
+  chatSession: ChatSession;
+  onUpdateChatSession: (sessionId: string, updates: Partial<ChatSession>) => void;
+}
+
+export const CyberLawAssistantDashboard: React.FC<CyberLawAssistantDashboardProps> = ({
+  chatSession,
+  onUpdateChatSession
+}) => {
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState<Jurisdiction>(chatSession.jurisdiction);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState<boolean>(true); // Default to enabled
+  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState<boolean>(true);
   
   const currentJurisdictionName = JURISDICTIONS_LIST.find(j => j.id === selectedJurisdiction)?.name || selectedJurisdiction;
+
+  // Initialize chat session if it's empty
+  useEffect(() => {
+    if (chatSession.messages.length === 0) {
+      const systemMessage: Message = {
+        id: 'system-intro-' + Date.now(),
+        text: `${LEXMACHINA_BOT_NAME} activated for ${currentJurisdictionName}. Web search is currently ${isWebSearchEnabled ? "ENABLED" : "DISABLED"}. How can I assist with your cyber law query?`,
+        sender: 'system',
+        timestamp: new Date().toISOString(),
+      };
+      
+      onUpdateChatSession(chatSession.id, {
+        messages: [systemMessage],
+        jurisdiction: selectedJurisdiction
+      });
+    }
+  }, [chatSession.id, chatSession.messages.length, currentJurisdictionName, isWebSearchEnabled, onUpdateChatSession, selectedJurisdiction]);
 
   const handleToggleWebSearch = () => {
     setIsWebSearchEnabled(prev => !prev);
@@ -25,36 +49,11 @@ export const CyberLawAssistantDashboard: React.FC = () => {
         sender: 'system',
         timestamp: new Date().toISOString(),
     };
-    setMessages(prev => [...prev, systemMessage]);
+    
+    onUpdateChatSession(chatSession.id, {
+      messages: [...chatSession.messages, systemMessage]
+    });
   };
-
-  useEffect(() => {
-    setMessages([
-      {
-        id: 'system-intro-' + Date.now(),
-        text: `${LEXMACHINA_BOT_NAME} activated for ${currentJurisdictionName}. Web search is currently ${isWebSearchEnabled ? "ENABLED" : "DISABLED"}. How can I assist with your cyber law query?`,
-        sender: 'system',
-        timestamp: new Date().toISOString(),
-      }
-    ]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedJurisdiction, currentJurisdictionName]); 
-
-  useEffect(() => {
-    if (messages.length > 1 && messages.some(m => m.id.startsWith('system-intro'))) { 
-        // This logic is to update the welcome message if web search is toggled *before* any other interaction
-        // If messages only contains the intro message, update it.
-        if (messages.length === 1 && messages[0].id.startsWith('system-intro')) {
-             setMessages(prev => prev.map(m => 
-                m.id.startsWith('system-intro') 
-                ? { ...m, text: `${LEXMACHINA_BOT_NAME} activated for ${currentJurisdictionName}. Web search is currently ${isWebSearchEnabled ? "ENABLED" : "DISABLED"}. How can I assist with your cyber law query?`}
-                : m
-            ));
-        }
-        // If more messages exist, a separate system message about toggle is already handled by handleToggleWebSearch
-    }
-  }, [isWebSearchEnabled, currentJurisdictionName, messages]);
-
 
   const handleSendMessage = useCallback(async (userInput: string) => {
     setError(null);
@@ -65,18 +64,36 @@ export const CyberLawAssistantDashboard: React.FC = () => {
       timestamp: new Date().toISOString(),
     };
     
-    const updatedMessages = [...messages, newUserMessage];
-    setMessages(updatedMessages);
+    const updatedMessages = [...chatSession.messages, newUserMessage];
+    
+    // Update chat session title if it's the first user message
+    let sessionUpdates: Partial<ChatSession> = {
+      messages: updatedMessages,
+      jurisdiction: selectedJurisdiction
+    };
+    
+    if (chatSession.title === 'New Chat') {
+      const truncatedTitle = userInput.length > 30 
+        ? userInput.substring(0, 30) + '...'
+        : userInput;
+      sessionUpdates.title = truncatedTitle;
+    }
+    
+    onUpdateChatSession(chatSession.id, sessionUpdates);
     setIsLoading(true);
 
     const botMessageId = 'bot-' + Date.now();
-    setMessages(prev => [...prev, { 
+    const botMessage: Message = { 
         id: botMessageId, 
         text: "", 
         sender: 'bot', 
         timestamp: new Date().toISOString(),
         sources: [] 
-    }]);
+    };
+    
+    onUpdateChatSession(chatSession.id, {
+      messages: [...updatedMessages, botMessage]
+    });
 
     let fullBotResponse = "";
     let finalSources: GroundingChunk[] = [];
@@ -90,32 +107,41 @@ export const CyberLawAssistantDashboard: React.FC = () => {
         if (chunkSources) {
             finalSources = chunkSources; 
         }
-        setMessages(prev => prev.map(m => 
-            m.id === botMessageId ? { ...m, text: fullBotResponse, sources: finalSources } : m
-        ));
+        
+        const currentMessages = [...updatedMessages, { ...botMessage, text: fullBotResponse, sources: finalSources }];
+        onUpdateChatSession(chatSession.id, {
+          messages: currentMessages
+        });
       },
       (errorMsg) => {
         setError(errorMsg);
-        setMessages(prev => prev.map(m => 
-            m.id === botMessageId ? { ...m, text: `Error: ${errorMsg}`, glitch: false } : m
-        ));
+        const currentMessages = [...updatedMessages, { ...botMessage, text: `Error: ${errorMsg}`, glitch: false }];
+        onUpdateChatSession(chatSession.id, {
+          messages: currentMessages
+        });
         setIsLoading(false);
       },
       () => {
         setIsLoading(false);
         if (!fullBotResponse && !error) {
-             setMessages(prev => prev.map(m => 
-                m.id === botMessageId ? { ...m, text: "I could not generate a response for this query. Please try rephrasing or try another query.", glitch: false } : m
-            ));
+          const currentMessages = [...updatedMessages, { ...botMessage, text: "I could not generate a response for this query. Please try rephrasing or try another query.", glitch: false }];
+          onUpdateChatSession(chatSession.id, {
+            messages: currentMessages
+          });
         }
       }
     );
-  }, [selectedJurisdiction, messages, isWebSearchEnabled, error]); 
+  }, [selectedJurisdiction, chatSession, isWebSearchEnabled, error, onUpdateChatSession]); 
 
   const handleJurisdictionChange = (newJurisdiction: Jurisdiction) => {
     setSelectedJurisdiction(newJurisdiction);
     setError(null); 
-    setIsLoading(false); 
+    setIsLoading(false);
+    
+    // Update the chat session jurisdiction
+    onUpdateChatSession(chatSession.id, {
+      jurisdiction: newJurisdiction
+    });
   };
 
   return (
@@ -137,7 +163,7 @@ export const CyberLawAssistantDashboard: React.FC = () => {
       {/* The main chat window area takes up remaining space */}
       <div className="flex-grow overflow-hidden"> 
         <CyberLawChatWindow
-            messages={messages}
+            messages={chatSession.messages}
             onSendMessage={handleSendMessage}
             isBotLoading={isLoading}
             botName={LEXMACHINA_BOT_NAME}
