@@ -170,7 +170,7 @@ const App: React.FC = () => {
             
             <div className="flex items-center gap-2">
               <img 
-                src="/AdvRobot Logo.png" 
+                src="/Adv Robot logo.png" 
                 alt="Adv.Robot Logo" 
                 className="h-8 w-auto sm:h-10 md:h-12"
               />
